@@ -12,7 +12,7 @@ def exp_backoff(func: callable,
                 max_time: int = 60,
                 wait_before: bool = False,
                 ) -> callable:
-    '''Exponential fallback decorator
+    '''Exponential backoff decorator
 
     Args:
         func(callable): The function to decorate
@@ -56,15 +56,15 @@ def exp_backoff(func: callable,
 
 
 def run_with_backoff(func: callable, func_args: dict, **kwargs) -> Any:
-    '''Run a function with exponential fallback
+    '''Run a function with exponential backoff
 
     Args:
         func(callable): The function to run
         func_args(dict): The arguments to pass to the function
-        **kwargs: The arguments to pass to the fallback decorator. See `exp_fallback` for more details.
+        **kwargs: The arguments to pass to the backoff decorator. See `exp_backoff` for more details.
 
     Returns:
         Any: The result of the function
     '''
-    fallback_func = exp_backoff(func, **kwargs)
-    return fallback_func(**func_args)
+    backoff_fun = exp_backoff(func, **kwargs)
+    return backoff_fun(**func_args)
