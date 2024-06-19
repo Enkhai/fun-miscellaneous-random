@@ -12,13 +12,19 @@ class MySqlCRUD:
 
     @classmethod
     @logger.catch(message="Failed to connect to database", reraise=True)
-    def _create_session(cls) -> None:
+    def _create_session(cls) -> Session:
         logger.info("Connecting to database...")
         engine = create_engine(f"mysql+mysqlconnector://{os.environ['MYSQL_USER']}:{os.environ['MYSQL_PASS']}@"
                                f"{os.environ['MYSQL_HOST']}/{os.environ['MYSQL_DB_NAME']}")
 
-        cls._session = sessionmaker(bind=engine)()
+        session = sessionmaker(bind=engine)()
         logger.info("Connected to database.")
+        return session
+
+    @classmethod
+    def _init_session(cls) -> None:
+        if cls._session is None:
+            cls._session = cls._create_session()
 
     def __del__(self):
         if self._session is not None:
@@ -37,6 +43,7 @@ class MySqlCRUD:
     @classmethod
     @contextmanager
     def transaction(cls) -> None:
+        cls._init_session()
         cls._transaction_active = True
         try:
             yield
@@ -53,6 +60,7 @@ class MySqlCRUD:
                  query: str,
                  params: Optional[tuple[dict]] = None,
                  return_last_insert: Optional[bool] = False) -> Optional[Union[list[dict], int]]:
+        cls._init_session()
         result = cls._session.execute(text(query), params or ())
         cls._session.flush()
         if not cls._transaction_active:
@@ -125,6 +133,3 @@ class MySqlCRUD:
 
         cls._execute(query, (where,))
         return result
-
-
-MySqlCRUD._create_session()
