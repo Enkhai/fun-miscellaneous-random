@@ -1,5 +1,4 @@
 import os
-from abc import ABC
 from contextlib import contextmanager
 from typing import Optional, Union
 
@@ -8,7 +7,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 
 
-class MySqlCRUD(ABC):
+class MySqlCRUD:
     _session: Session = None
 
     @classmethod
